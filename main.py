@@ -13,6 +13,7 @@ from torch.utils.data import DataLoader, Dataset
 PAD_TOKEN = "<pad>"
 SOS_TOKEN = "<sos>"
 EOS_TOKEN = "<eos>"
+UNK_TOKEN = "<unk>"
 
 
 @dataclass
@@ -29,16 +30,17 @@ class Vocabulary:
     """Bidirectional mapping between string tokens and integer ids."""
 
     def __init__(self, tokens: Iterable[str]):
-        specials = [PAD_TOKEN, SOS_TOKEN, EOS_TOKEN]
+        specials = [PAD_TOKEN, SOS_TOKEN, EOS_TOKEN, UNK_TOKEN]
         unique_tokens = list(dict.fromkeys(specials + sorted(set(tokens))))
         self._index_to_token: List[str] = unique_tokens
         self._token_to_index: Dict[str, int] = {token: idx for idx, token in enumerate(unique_tokens)}
+        self._unk_index = self._token_to_index[UNK_TOKEN]
 
     def __len__(self) -> int:  # pragma: no cover - trivial
         return len(self._index_to_token)
 
     def token_to_index(self, token: str) -> int:
-        return self._token_to_index[token]
+        return self._token_to_index.get(token, self._unk_index)
 
     def index_to_token(self, index: int) -> str:
         return self._index_to_token[index]
